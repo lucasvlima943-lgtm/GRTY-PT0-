@@ -1,0 +1,530 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: radial-gradient(ellipse at center, #1c0f0f 0%, #0a0505 70%, #000 100%);
+}
+
+.palco {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contador-global {
+  position: fixed;
+  z-index: 10;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px;
+  border: 1px solid rgba(226, 205, 190, 0.3);
+  border-radius: 999px;
+  background: rgba(12, 8, 8, 0.84);
+  color: #f4e8dd;
+  font: bold 15px/1.2 Georgia, serif;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.42);
+  transform: translateX(-50%);
+  backdrop-filter: blur(8px);
+}
+
+.bolhas-cliques {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bolha-clique {
+  position: absolute;
+  left: var(--bolha-x);
+  top: var(--bolha-y);
+  width: var(--bolha-tamanho);
+  aspect-ratio: 1;
+  border: 1px solid hsla(var(--bolha-matiz), 90%, 78%, 0.76);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, hsla(var(--bolha-matiz), 95%, 92%, 0.7), transparent 19%),
+    radial-gradient(circle at 50% 48%, hsla(var(--bolha-matiz), 88%, 61%, 0.28), hsla(var(--bolha-matiz), 88%, 42%, 0.1) 55%, transparent 74%);
+  box-shadow:
+    inset 0 0 22px hsla(var(--bolha-matiz), 90%, 78%, 0.32),
+    0 0 22px hsla(var(--bolha-matiz), 90%, 68%, 0.42);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.35);
+  animation: surgir-bolha 5.5s ease-out forwards;
+}
+@keyframes surgir-bolha {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.35); }
+  14% { opacity: 0.82; }
+  70% { opacity: 0.58; transform: translate(-50%, calc(-50% - 26px)) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, calc(-50% - 52px)) scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bolha-clique {
+    animation: none;
+    opacity: 0.72;
+  }
+}
+
+.botao-clique {
+  position: fixed;
+  z-index: 10;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: 50%;
+  width: min(220px, calc(100vw - 32px));
+  min-height: 54px;
+  padding: 12px 18px;
+  border: 1px solid rgba(226, 205, 190, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #76251f, #3b1717);
+  color: #fff4eb;
+  font: bold 18px Georgia, serif;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.48);
+  transform: translateX(-50%);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+.botao-clique:hover {
+  border-color: #e18b68;
+  background: linear-gradient(135deg, #96352b, #57201d);
+}
+.botao-clique:disabled { cursor: wait; opacity: 0.7; }
+.botao-clique:active { transform: translateX(-50%) scale(0.96); }
+.botao-clique:focus-visible { outline: 2px solid #f4c8a7; outline-offset: 3px; }
+.leitor-progresso {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.palco.tremendo {
+  animation: tremer 0.85s ease-out;
+}
+@keyframes tremer {
+  0%, 100% { transform: translate(0, 0); }
+  12% { transform: translate(-7px, 3px); }
+  24% { transform: translate(6px, -4px); }
+  36% { transform: translate(-5px, 2px); }
+  48% { transform: translate(4px, -3px); }
+  60% { transform: translate(-3px, 2px); }
+  72% { transform: translate(2px, -1px); }
+  84% { transform: translate(-1px, 1px); }
+}
+
+/* ---------- Flutuar + giro ---------- */
+.flutuador {
+  position: relative;
+  perspective: 1200px;
+  animation: flutuar 6s ease-in-out infinite;
+  z-index: 2;
+}
+
+.imagem {
+  position: relative;
+  width: min(calc(75vh * 0.70707), 90vw);
+  aspect-ratio: 210 / 297;
+  transform-style: preserve-3d;
+  box-shadow: 0 0 90px rgba(180, 40, 40, 0.35);
+  transition: box-shadow 3s ease;
+  animation: girar 30s linear infinite;
+}
+
+.imagem > img,
+.brilho, .reflexo, .flash, .cascas, .mar {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.imagem > img { object-fit: contain; user-select: none; }
+.cascas canvas, .mar canvas { display: block; width: 100%; height: 100%; }
+
+/* Terceira imagem: fica escondida até o mar terminar de inundar a página */
+.img-terceira { visibility: hidden; }
+.imagem.mar-final .img-terceira { visibility: visible; }
+.imagem.mar-final .img-nova { display: none; }
+.img-quarta { visibility: hidden; }
+.imagem.formando-quarta .img-quarta,
+.imagem.quarta-final .img-quarta { visibility: visible; }
+.imagem.formando-quarta .img-quarta {
+  clip-path: circle(0% at 50% 50%);
+  animation: revelar-quarta 5s cubic-bezier(0.2, 0.72, 0.2, 1) forwards;
+}
+.imagem.quarta-final .img-quarta { clip-path: none; }
+.imagem.formando-quarta .img-terceira,
+.imagem.quarta-final .img-terceira { visibility: hidden; }
+.imagem.quarta-final .img-quarta { z-index: 1; }
+@keyframes revelar-quarta {
+  to { clip-path: circle(75% at 50% 50%); }
+}
+
+.imagem.trocada .img-antiga { display: none; }
+
+@keyframes flutuar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-25px); }
+}
+@keyframes girar {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+
+/* ---------- Efeitos brancos ----------
+   Ficam escondidos e só aparecem quando a imagem nova começa a surgir
+   (classe "efeitos" no .palco, colocada pelo script). */
+
+.halo {
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 3s ease, transform 3s ease;
+}
+.halo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.2) 45%, transparent 72%);
+  filter: blur(22px);
+  opacity: 0;
+  transition: opacity 3s ease;
+  animation: respirar-forte 3.5s ease-in-out infinite;
+}
+.halo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(255,255,255,0.24) 0%, rgba(255,210,210,0.10) 40%, transparent 70%);
+  filter: blur(18px);
+  animation: respirar 5s ease-in-out infinite;
+}
+@keyframes respirar {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50%      { opacity: 1;    transform: scale(1.04); }
+}
+
+@keyframes respirar-forte {
+  0%, 100% { transform: scale(0.95); }
+  50%      { transform: scale(1.08); }
+}
+
+/* Brilho branco por baixo: aparece pelos buracos abertos pelos tentáculos */
+.brilho { opacity: 0; transition: opacity 2.5s ease; }
+.brilho::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 85%,
+    rgba(255,255,255,0.75), rgba(255,255,255,0.25) 40%, transparent 70%);
+  animation: pulsar 5s ease-in-out infinite;
+}
+.brilho::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 55%,
+    rgba(255,255,255,0.95), rgba(255,255,255,0.4) 45%, transparent 78%);
+  opacity: 0;
+  transition: opacity 2.5s ease;
+  animation: pulsar-forte 3s ease-in-out infinite;
+}
+@keyframes pulsar {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.7; }
+}
+@keyframes pulsar-forte {
+  0%, 100% { transform: scale(0.94); }
+  50%      { transform: scale(1.08); }
+}
+
+/* Reflexo branco que varre a página devagar */
+.reflexo {
+  opacity: 0;
+  transition: opacity 3s ease;
+  background: linear-gradient(115deg,
+    transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+  background-size: 250% 100%;
+  animation: varrer 8s linear infinite;
+}
+@keyframes varrer {
+  from { background-position: 150% 0; }
+  to   { background-position: -100% 0; }
+}
+
+/* Brilho inicial reservado à aparição da terceira página */
+.flash {
+  background: radial-gradient(ellipse at 50% 100%,
+    rgba(255,255,255,0.9), rgba(255,255,255,0.3) 45%, transparent 75%);
+  opacity: 0;
+}
+
+/* Partículas brancas subindo */
+.particulas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 3s ease;
+}
+.particulas.atras { z-index: 1; }
+.particulas.frente { z-index: 3; }
+
+.runas-chuva {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.runa-chuva {
+  position: absolute;
+  left: var(--x);
+  top: -20vh;
+  width: var(--tamanho-chuva);
+  height: var(--tamanho-chuva);
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.75))
+          drop-shadow(0 0 16px rgba(225, 231, 245, 0.8));
+}
+.runas-chuva.ativa .runa-chuva {
+  animation: cair-runa var(--queda-duracao) linear var(--queda-atraso) infinite;
+}
+@keyframes cair-runa {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -12vh, 0) rotate(0deg) scale(0.72);
+  }
+  12% { opacity: 0.94; }
+  85% { opacity: 0.78; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--deriva), 125vh, 0) rotate(var(--rotacao-final)) scale(1);
+  }
+}
+
+.particula {
+  position: absolute;
+  bottom: -10px;
+  left: var(--x);
+  width: var(--t);
+  height: var(--t);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%);
+  opacity: 0;
+  animation: subir var(--d) linear infinite;
+  animation-delay: var(--atraso);
+}
+@keyframes subir {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  10%  { opacity: 0.85; }
+  90%  { opacity: 0.45; }
+  100% { transform: translate(var(--bal), -105vh); opacity: 0; }
+}
+
+/* Quando a imagem nova aparece */
+.palco.efeitos .halo,
+.palco.efeitos .brilho,
+.palco.efeitos .reflexo,
+.palco.efeitos .particulas { opacity: 1; }
+.palco.efeitos .imagem {
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.18), 0 0 90px rgba(180, 40, 40, 0.35);
+}
+
+/* ---------- Efeitos brancos FORTES (quando a terceira página aparece) ---------- */
+.palco.fortes .halo { transform: scale(1.2); }
+.palco.fortes .halo::after,
+.palco.fortes .brilho::after { opacity: 1; }
+.palco.fortes .reflexo {
+  background: linear-gradient(115deg,
+    transparent 35%, rgba(255,255,255,0.32) 50%, transparent 65%);
+  background-size: 250% 100%;
+  animation-duration: 4.5s;
+}
+.palco.fortes .imagem {
+  box-shadow: 0 0 80px rgba(255, 255, 255, 0.5), 0 0 120px rgba(180, 40, 40, 0.35);
+}
+.particula.forte { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.6); }
+
+/* Runas dos elementos circulam a página sem cobrir o conteúdo. */
+.runas-flutuantes {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+}
+.runa-flutuante {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: clamp(38px, 6vw, 78px);
+  height: clamp(38px, 6vw, 78px);
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.72))
+          drop-shadow(0 0 18px rgba(196, 208, 229, 0.48));
+  animation: runa-aparecer 1.2s ease forwards,
+             runa-flutuar var(--duracao) ease-in-out var(--atraso) infinite;
+}
+.runa-flutuante.colorida {
+  filter: drop-shadow(0 0 8px var(--runa-cor-contorno))
+          drop-shadow(0 0 18px var(--runa-cor-contorno));
+}
+.runa-flutuante.direita { animation-delay: 0.35s, var(--atraso); }
+@keyframes runa-aparecer {
+  to { opacity: 0.9; }
+}
+@keyframes runa-flutuar {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-7deg); }
+  50% { transform: translate3d(var(--oscilacao), -24px, 0) rotate(8deg); }
+}
+
+.runas-flutuantes.formando-circulo .runa-flutuante {
+  left: 50%;
+  top: 50%;
+  width: clamp(22px, 3.2vw, 42px);
+  height: clamp(22px, 3.2vw, 42px);
+  opacity: 0;
+}
+.runas-flutuantes.formando-circulo .runa-circulo {
+  animation: reunir-runa 2.2s cubic-bezier(0.18, 0.72, 0.25, 1) var(--atraso-entrada) forwards,
+             girar-circulo 18s linear 2.2s infinite;
+}
+@keyframes reunir-runa {
+  0% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.25) rotate(-200deg);
+  }
+  65% { opacity: 1; }
+  100% {
+    opacity: 0.96;
+    transform: rotate(var(--angulo)) translateX(min(22vw, 170px)) scale(1);
+  }
+}
+@keyframes girar-circulo {
+  from { transform: rotate(var(--angulo)) translateX(min(22vw, 170px)) scale(1); }
+  to { transform: rotate(calc(var(--angulo) + 360deg)) translateX(min(22vw, 170px)) scale(1); }
+}
+
+.runas-centro {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 1.4s ease;
+}
+.runas-centro.circulo-final { display: block; }
+.runas-centro.sumindo { opacity: 0; }
+.entrada-runa {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  animation: reunir-runa 2.4s cubic-bezier(0.18, 0.72, 0.25, 1) var(--atraso-entrada) both;
+}
+.orbita-runa {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  animation: orbitar-runa var(--duracao-orbita) linear calc(2.4s + var(--atraso-entrada)) infinite;
+}
+.icone-magico {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 3px rgba(20, 18, 32, 0.8))
+          drop-shadow(0 0 12px rgba(225, 231, 245, 0.9));
+}
+.orientacao-runa {
+  position: absolute;
+  left: calc(var(--tamanho-runa) / -2);
+  top: calc(var(--tamanho-runa) / -2);
+  width: var(--tamanho-runa);
+  height: var(--tamanho-runa);
+  animation: contra-giro-orbita var(--duracao-orbita) linear calc(2.4s + var(--atraso-entrada)) infinite;
+}
+@keyframes reunir-runa {
+  0% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.18);
+  }
+  65% { opacity: 1; }
+  100% {
+    opacity: 0.98;
+    transform: none;
+  }
+}
+@keyframes orbitar-runa {
+  from { transform: rotate(var(--angulo)) translateX(var(--raio-orbita)); }
+  to { transform: rotate(calc(var(--angulo) + var(--giro-orbita))) translateX(var(--raio-orbita)); }
+}
+@keyframes contra-giro-orbita {
+  from { transform: rotate(var(--contra-giro)); }
+  to { transform: rotate(calc(var(--contra-giro) - var(--giro-orbita))); }
+}
+
+/* Clarão grande quando a página nova surge do mar */
+.imagem.revelando .flash {
+  background: radial-gradient(circle at 50% 50%,
+    rgba(255,255,255,1), rgba(255,255,255,0.5) 55%, transparent 90%);
+  animation: flash-forte 2.6s ease-out;
+}
+@keyframes flash-forte {
+  0%   { opacity: 0; }
+  20%  { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* ---------- Sombra no chão ---------- */
+.sombra {
+  position: absolute;
+  bottom: 5vh;
+  left: 50%;
+  width: 30vh;
+  height: 3vh;
+  margin-left: -15vh;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.8), transparent 70%);
+  filter: blur(6px);
+  animation: sombra 6s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes sombra {
+  0%, 100% { transform: scale(1);   opacity: 0.9; }
+  50%      { transform: scale(0.7); opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palco.tremendo, .flutuador, .imagem, .sombra, .halo::before, .halo::after, .brilho::before, .brilho::after, .reflexo { animation: none; }
+  .runa-flutuante { opacity: 0.9; animation: none; }
+  .runas-flutuantes.formando-circulo .runa-circulo {
+    opacity: 0.96;
+    transform: rotate(var(--angulo)) translateX(min(22vw, 170px));
+  }
+  .runas-centro.sumindo { opacity: 1; }
+  .runas-chuva.ativa .runa-chuva { opacity: 0.9; animation: none; }
+  .entrada-runa { opacity: 1; transform: none; animation: none; }
+  .orbita-runa { transform: rotate(var(--angulo)) translateX(var(--raio-orbita)); animation: none; }
+  .orientacao-runa { transform: rotate(var(--contra-giro)); animation: none; }
+  .particulas { display: none; }
+}

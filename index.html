@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Página Flutuante</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="palco" id="palco">
+        <p class="contador-global" id="contador-global" aria-live="polite">Cliques globais: carregando…</p>
+        <div class="particulas atras" id="particulas-atras" aria-hidden="true"></div>
+        <div class="bolhas-cliques" id="bolhas-cliques" aria-hidden="true"></div>
+        <div class="runas-chuva" id="runas-chuva" aria-hidden="true"></div>
+        <div class="flutuador">
+            <div class="halo" aria-hidden="true"></div>
+            <div class="imagem" id="imagem">
+                <img class="img-nova" src="nova-imagem.jpg" alt="Nova página" draggable="false">
+                <img class="img-terceira" id="terceira" src="terceira-imagem.jpg" alt="Terceira página"
+                    draggable="false">
+                <img class="img-quarta" id="quarta" src="quarta-imagem.jpg" alt="Quarta página"
+                    draggable="false">
+                <div class="brilho" aria-hidden="true"></div>
+                <img class="img-antiga" id="antiga" src="imagem.png" alt="Página flutuante" draggable="false">
+                <div class="cascas" id="cascas" aria-hidden="true"></div>
+                <div class="mar" id="mar" aria-hidden="true"></div>
+                <div class="reflexo" aria-hidden="true"></div>
+                <div class="flash" aria-hidden="true"></div>
+                <div class="runas-centro" id="runas-centro" aria-hidden="true"></div>
+            </div>
+        </div>
+        <div class="sombra" aria-hidden="true"></div>
+        <div class="particulas frente" id="particulas-frente" aria-hidden="true"></div>
+        <div class="runas-flutuantes" id="runas-flutuantes" aria-hidden="true"></div>
+        <audio id="musica-fundo" src="sounds/background-music.mp3" preload="auto"></audio>
+        <audio id="musica-fase-final" src="sounds/background-music-final.mp3" preload="auto"></audio>
+        <audio id="som-transicao-final" preload="auto" aria-hidden="true">
+            <source src="sounds/transicao-final.mp3" type="audio/mpeg">
+        </audio>
+        <button class="botao-clique" id="botao-clique" type="button" disabled>Clique</button>
+        <p class="leitor-progresso" id="leitor-progresso" role="status" aria-live="polite">
+            Conectando ao contador global de cliques.
+        </p>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
